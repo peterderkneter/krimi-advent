@@ -66,7 +66,7 @@ function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clea
 /* ---------- Start und Intro ---------- */
 $('#btn-start').onclick=()=>{ac();if(st.act)beginIntro();else access().then(ok=>ok&&beginIntro())};
 function beginIntro(){SFX.paper();show('#s-intro');const v=$('#intro');v.currentTime=0;v.muted=!st.sound;v.play().catch(()=>{v.muted=true;v.play().catch(goDesk)});
- const lines=[[1.2,'Der Weihnachtsdiamant ist verschwunden.'],[4.6,'24 Tage. 24 Beweisstücke.'],[8,'Jeden Morgen eine neue Spur.'],[10.6,'']];
+ const lines=[[0.9,'London, Dezember 1891.'],[4.9,'Dichter Nebel liegt über der Stadt.'],[7.5,'Der Weihnachtsdiamant ist verschwunden.'],[12.3,'Sechs Verdächtige.'],[13.8,'24 Beweisstücke.'],[16.2,'Und ich brauche deine Hilfe, Ermittler.'],[19.6,'']];
  const it=$('#intro-text');v.ontimeupdate=()=>{let txt='';lines.forEach(l=>{if(v.currentTime>=l[0])txt=l[1]});if(it.textContent!==txt)it.textContent=txt};
  v.onended=goDesk}
 $('#btn-skip').onclick=goDesk;
@@ -79,7 +79,7 @@ $('#btn-akte-back').onclick=()=>{SFX.paper();show('#s-desk')};
 /* ---------- Schreibtisch ---------- */
 function renderReport(box,big){box.innerHTML='';let i=0;WORDS.forEach(w=>{const g=el('div','word');for(let k=0;k<w;k++){const d=i+1;const s=el('div','slot',st.done[d]?SOL[i]:'');s.dataset.d=d;g.appendChild(s);i++}box.appendChild(g)})}
 function renderDesk(){renderReport($('#report'));const g=$('#grid');g.innerHTML='';const td=todayNr();
- for(let d=1;d<=24;d++){const b=el('button','env');b.style.setProperty('--r',((d*37)%7-3)*.6+'deg');const u=unlocked(d);
+ for(let d=1;d<=24;d++){const b=el('button','env');b.style.setProperty('--r',((d*37)%7-3)*.6+'deg');b.style.setProperty('--i',d);const u=unlocked(d);
   if(st.done[d])b.classList.add('open');else if(!u)b.classList.add('locked');if(d===td&&!st.done[d])b.classList.add('today');
   b.appendChild(el('span','num',d));b.appendChild(el('span','wax',st.done[d]?SOL[d-1]:(u?'KZ':'🔒')));
   b.onclick=()=>{if(!unlocked(d)){SFX.no();toast('Dieser Umschlag ist bis zum '+d+'. Dezember versiegelt.');return}SFX.tap();if(st.done[d]||st.open[d])openCase(d);else openEnv(d)};g.appendChild(b)}
@@ -138,7 +138,7 @@ function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');setTimeout(()=>s
   if(ok){showSolved(true)}else{SFX.no();const p=$('.paper');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');if(navigator.vibrate)navigator.vibrate([40,40,40]);toast('Das passt noch nicht. Schau dir die Spur noch einmal an.')}}
  ctx.check=check;
  function showSolved(fresh){const L=D.L;sv.innerHTML='<span class="stamp2">GELÖST</span>Dein Buchstabe:<b>'+L+'</b><br><span style="font-size:14px">'+D.how+'. Eingetragen in Feld '+d+' deines Ermittlungsberichts.</span>';sv.style.display='block';
-  if(fresh){st.done[d]=1;save();SFX.seal();setTimeout(SFX.ok,250);if(navigator.vibrate)navigator.vibrate([20,60,20]);setTimeout(()=>sv.scrollIntoView({behavior:'smooth',block:'center'}),400)}
+  if(fresh){st.done[d]=1;save();SFX.seal();const fl=el('div','flyletter',L);document.body.appendChild(fl);setTimeout(()=>fl.remove(),1700);setTimeout(SFX.ok,250);if(navigator.vibrate)navigator.vibrate([20,60,20]);setTimeout(()=>sv.scrollIntoView({behavior:'smooth',block:'center'}),400)}
   if(d===24&&Object.keys(st.done).length===24){const fb=el('button','btn','Zum Finale');fb.style.marginTop='12px';fb.onclick=finale;sv.appendChild(el('br'));sv.appendChild(fb)}}}
 $('#btn-case-back').onclick=()=>{hush();SFX.paper();renderDesk();show('#s-desk');setTimeout(()=>{const s=document.querySelector('#report .slot[data-d="'+curDay+'"]');if(s&&st.done[curDay]){s.classList.add('new')}},300)};
 
@@ -188,8 +188,10 @@ const WIDGETS={
   ctx.D.a=['__OK__'];ctx.noInput=true;ctx.W.append(g,ar,stop,rs);draw()},
  choice(ctx){ctx.W.appendChild(choice(ctx,ctx.D.w.opts,ctx.D.w.cols))},
  prints(ctx){const mk=(open,scar,whorl)=>{const s=svgEl('svg',{viewBox:'-30 -36 60 72',width:'100%'});s.appendChild(svgEl('ellipse',{rx:26,ry:33,fill:'#f2e6cf',stroke:'#c9b48a'}));
-   for(let i=1;i<=7;i++){const k=i*3.4;if(whorl)s.appendChild(svgEl('ellipse',{rx:k,ry:k*1.25,fill:'none',stroke:'#3b2a1e','stroke-width':1.3}));else{const d=open>0?`M ${-k} ${k*1.6} L ${-k} ${-k*.2} A ${k} ${k} 0 0 1 ${k} ${-k*.2} L ${k} ${k*.4}`:`M ${k} ${k*1.6} L ${k} ${-k*.2} A ${k} ${k} 0 0 0 ${-k} ${-k*.2} L ${-k} ${k*.4}`;s.appendChild(svgEl('path',{d,fill:'none',stroke:'#3b2a1e','stroke-width':1.3}))}}
-   if(scar)s.appendChild(svgEl('line',{x1:scar[0],y1:scar[1],x2:scar[0]+16,y2:scar[1]+11,stroke:'#f2e6cf','stroke-width':7,'stroke-linecap':'round'}));return s};
+   const cid='fp'+Math.random().toString(36).slice(2);const cp=svgEl('clipPath',{id:cid});cp.appendChild(svgEl('ellipse',{rx:25,ry:32}));s.appendChild(cp);const gw=svgEl('g',{'clip-path':'url(#'+cid+')'});s.appendChild(gw);const g=svgEl('g',{transform:whorl?'':'rotate('+(open>0?-90:90)+') scale(.95)'});gw.appendChild(g);
+   for(let i=1;i<=7;i++){const k=i*3.4;if(whorl)g.appendChild(svgEl('ellipse',{rx:k,ry:k*1.25,fill:'none',stroke:'#3b2a1e','stroke-width':1.3}));else g.appendChild(svgEl('path',{d:`M ${-k} ${k*1.9} L ${-k} ${-k*.2} A ${k} ${k} 0 0 1 ${k} ${-k*.2} L ${k} ${k*1.9}`,fill:'none',stroke:'#3b2a1e','stroke-width':1.3}))}
+   if(scar)g.appendChild(svgEl('line',{x1:scar[0],y1:scar[1],x2:scar[0]+14,y2:scar[1]+9,stroke:'#f2e6cf','stroke-width':6,'stroke-linecap':'round'}));
+   const clip=svgEl('ellipse',{rx:26,ry:33,fill:'none',stroke:'#c9b48a','stroke-width':3});s.appendChild(clip);return s};
   const v=el('div','box');v.style.textAlign='center';v.innerHTML='<div class="kick" style="color:#8f1c20">Abdruck von der Vitrine</div>';const vs=mk(1,[-14,-6]);vs.style.width='90px';v.appendChild(vs);ctx.W.appendChild(v);
   const P=[['K',mk(-1,[-14,-6])],['M',mk(1,[-14,-6])],['S',mk(1,null)],['L',mk(0,null,1)],['P',mk(1,[6,10])],['B',mk(-1,null)]];
   const g=choice(ctx,P,3,(b,o)=>{b.style.textAlign='center';b.appendChild(o[1]);b.appendChild(el('div','lab',o[0]))});g.style.marginTop='10px';ctx.W.appendChild(g)},
@@ -245,11 +247,50 @@ function numtab(){const t=el('div','numtab');'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(
 function renderAkte(){const s=$('#suspects');s.innerHTML='';SUSPECTS.forEach(x=>s.appendChild(el('div','','<span class="ic">'+x.i+'</span><b>'+x.n+'</b>'+x.r)));const n=$('#numtab');n.replaceWith(Object.assign(numtab(),{id:'numtab'}))}
 
 /* ---------- Finale ---------- */
-function finale(){show('#s-final');renderReport($('#final-report'),true);SFX.chime();const l=$('#accuse-list');l.innerHTML='';$('#verdict').style.display='none';$('#accuse').style.display='block';
- SUSPECTS.forEach(x=>{const b=el('button','','<span class="ic">'+x.i+'</span><b>'+x.n+'</b>'+x.r);b.onclick=()=>{if(x.n!=='Silas Tolliver'){SFX.no();toast(x.n+' hat ein Alibi. Lies deinen Bericht noch einmal.');return}verdict()};l.appendChild(b)})}
-function verdict(){SFX.seal();setTimeout(()=>say('fin'),900);setTimeout(SFX.chime,300);$('#accuse').style.display='none';const v=$('#verdict');v.style.display='block';
- v.innerHTML='<div class="diamond">💎</div><h2>Fall gelöst!</h2><p class="story">Der Täter ist <b>Silas Tolliver</b>, der Uhrmacher. In der Nacht kam er mit seiner Werkzeugtasche zurück, öffnete die kaputte Standuhr und versteckte den Weihnachtsdiamanten im Uhrwerk. Darum tickte sie am Morgen wieder.</p><p class="story">Lady Ashcombe hält ihren Diamanten wieder in den Händen, und Inspektor Grimsby lässt ausrichten: Ohne dich hätte er diesen Fall nie gelöst.</p><video src="a/lupe.mp4" autoplay muted playsinline loop></video><p class="story" style="text-align:center"><b>Frohe Weihnachten, Ermittler!</b></p>'+(gift&&gift.von?'<p class="story" style="text-align:center">Diesen Fall hat dir '+esc(gift.von)+' geschenkt.</p>':'');
- for(let i=0;i<14;i++)setTimeout(()=>tone(800+Math.random()*900,.4,'sine',.06),i*120)}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let finRun=0;
+async function finale(){const run=++finRun;hush();show('#s-final');['#scene-clock','#verdict','#cert-wrap'].forEach(x=>$(x).classList.remove('on'));$('#gclock').className='gclock';
+ const box=$('#final-report');renderReport(box,true);const slots=[...box.querySelectorAll('.slot')];slots.forEach(s=>{s.dataset.l=s.textContent;s.textContent=''});
+ const acc=$('#accuse');acc.style.opacity=0;acc.style.pointerEvents='none';const l=$('#accuse-list');l.innerHTML='';
+ SUSPECTS.forEach(x=>{const b=el('button','scard','<span class="ic">'+x.i+'</span><b>'+x.n+'</b>'+x.r+'<span class="sstamp"></span>');b.onclick=()=>accuse(b,x);l.appendChild(b)});
+ await sleep(500);for(const s of slots){if(run!==finRun)return;s.textContent=s.dataset.l;s.classList.add('new');SFX.key();await sleep(85)}
+ tone(1760,.5,'sine',.12);await sleep(400);acc.style.transition='opacity .8s';acc.style.opacity=1;acc.style.pointerEvents='auto'}
+function accuse(b,x){if(b.classList.contains('alibi')||$('#accuse-list').classList.contains('done'))return;
+ if(x.n!=='Silas Tolliver'){SFX.no();b.querySelector('.sstamp').textContent='ALIBI';b.classList.add('alibi');if(navigator.vibrate)navigator.vibrate([30,30,30]);toast(x.n+' hat ein Alibi. Lies deinen Bericht noch einmal.');return}
+ $('#accuse-list').classList.add('done');b.querySelector('.sstamp').textContent='SCHULDIG';b.classList.add('guilty');tone(70,.6,'sine',.7);noise(.35,250,1,.6);if(navigator.vibrate)navigator.vibrate([60,40,120]);
+ const c=$('#f-report-card');c.classList.remove('quake');void c.offsetWidth;c.classList.add('quake');setTimeout(clockScene,1500)}
+async function clockScene(){const sc=$('#scene-clock'),g=$('#gclock'),cap=$('#clock-cap');sc.classList.add('on');cap.textContent='Die kaputte Standuhr im Flur tickt wieder …';setTimeout(()=>sc.scrollIntoView({behavior:'smooth',block:'center'}),100);
+ g.classList.add('swing');for(let i=0;i<6;i++){tone(i%2?1500:1300,.06,'square',.05);noise(.04,4000,5,.15);await sleep(560)}
+ g.classList.remove('swing');g.classList.add('stop');cap.textContent='Silas Tolliver hat sie geöffnet. Und darin …';await sleep(700);
+ const c=ac(),n=noise(1.2,300,6,.25);n.bf.frequency.exponentialRampToValueAtTime(900,c.currentTime+1.1);g.classList.add('open');await sleep(1100);
+ g.classList.add('gem');SFX.chime();sparkleAt($('.gc-gem'),24);cap.textContent='… funkelt der Weihnachtsdiamant!';await sleep(1600);verdict()}
+function sparkleAt(node,n){const r=node.getBoundingClientRect();for(let i=0;i<n;i++){const s=el('div','sparkle');s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+r.height/2)+'px';const a=Math.random()*6.28,d=50+Math.random()*120;s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');s.style.animationDelay=(Math.random()*.3)+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),1400)}}
+function verdict(){const v=$('#verdict');say('fin');
+ v.innerHTML='<div class="stamp-big">FALL GELÖST</div><p class="story">Der Täter ist <b>Silas Tolliver</b>, der Uhrmacher. In der Nacht kam er mit seiner Werkzeugtasche zurück, öffnete die kaputte Standuhr und versteckte den Weihnachtsdiamanten im Uhrwerk. Darum tickte sie am Morgen wieder.</p><p class="story">Lady Ashcombe hält ihren Diamanten wieder in den Händen, und Inspektor Grimsby lässt ausrichten: Ohne dich hätte er diesen Fall nie gelöst.</p><p class="story center"><b>Frohe Weihnachten, Ermittler!</b></p>'+(gift&&gift.von?'<p class="story center small2">Diesen Fall hat dir '+esc(gift.von)+' geschenkt.</p>':'');
+ v.classList.add('on');setTimeout(()=>v.scrollIntoView({behavior:'smooth',block:'start'}),200);
+ for(let i=0;i<10;i++)setTimeout(()=>tone(900+Math.random()*900,.5,'sine',.05),i*140);
+ setTimeout(showCert,(window.VOX&&VOX.fin?VOX.fin[1]*1000:9000)+800)}
+function certName(){return (st.name||(gift&&gift.an)||'').trim()}
+function showCert(){const w=$('#cert-wrap');w.classList.add('on');const n=certName();$('#cert-name').textContent=n||'Ermittler';$('#cert-edit').style.display=n?'none':'flex';SFX.paper();setTimeout(()=>{w.scrollIntoView({behavior:'smooth',block:'start'});sparkleAt($('.cert-seal'),14)},300)}
+$('#cert-set').onclick=()=>{const v=$('#cert-input').value.trim();if(!v){toast('Bitte trag einen Namen ein.');return}st.name=v;save();$('#cert-name').textContent=v;$('#cert-edit').style.display='none';SFX.seal();sparkleAt($('#cert-name'),10)};
+async function certCanvas(){try{await document.fonts.ready}catch(e){}const W=1600,H=1130,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#f3e8cf');g.addColorStop(1,'#e2cfa6');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.strokeStyle='#8f1c20';x.lineWidth=10;x.strokeRect(40,40,W-80,H-80);x.strokeStyle='#b8913f';x.lineWidth=3;x.strokeRect(62,62,W-124,H-124);
+ const t=(s,y,font,col,ls)=>{x.font=font;x.fillStyle=col;x.textAlign='center';x.fillText(s,W/2,y)};
+ t('ABTEILUNG FÜR BESONDERE FÄLLE · LONDON',170,'28px "Special Elite"','#8f1c20');
+ t('Urkunde',300,'800 110px "Playfair Display"','#2a1d14');t('Hiermit wird',380,'italic 34px "Playfair Display"','#5a3e2a');
+ t($('#cert-name').textContent,480,'800 84px "Playfair Display"','#8f1c20');t('zum',550,'italic 34px "Playfair Display"','#5a3e2a');
+ t('MEISTERDETEKTIV',640,'800 78px "Playfair Display"','#2a1d14');
+ x.font='30px Lora';x.fillStyle='#3b2a1e';const txt='ernannt. In 24 Tagen wurden alle Beweisstücke gesichert, der Fall des Weihnachtsdiamanten aufgeklärt und der Täter Silas Tolliver überführt.';
+ let line='',y=730;txt.split(' ').forEach(wd=>{if(x.measureText(line+wd).width>1100){x.fillText(line,W/2,y);line='';y+=44}line+=wd+' '});x.fillText(line,W/2,y);
+ x.textAlign='center';x.font='italic 52px "Playfair Display"';x.fillStyle='#2a1d14';x.fillText('Grimsby',380,960);x.fillText('24.12.1891',1220,960);
+ x.strokeStyle='#2a1d14';x.lineWidth=2;[[250,510],[1090,1350]].forEach(([a,b])=>{x.beginPath();x.moveTo(a,985);x.lineTo(b,985);x.stroke()});
+ x.font='24px Lora';x.fillText('Inspektor Grimsby',380,1022);x.fillText('London',1220,1022);
+ const rg=x.createRadialGradient(780,940,10,800,960,90);rg.addColorStop(0,'#d4454a');rg.addColorStop(1,'#6e1014');x.fillStyle=rg;x.beginPath();x.arc(800,960,82,0,7);x.fill();
+ x.fillStyle='#f6c9b0';x.font='44px "Special Elite"';x.fillText('KZ',800,975);return cv}
+$('#cert-save').onclick=async()=>{SFX.tap();const cv=await certCanvas();cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Urkunde_Meisterdetektiv.png';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500);toast('Urkunde gespeichert')},'image/png')};
+$('#cert-share').onclick=async()=>{SFX.tap();const cv=await certCanvas();cv.toBlob(async b=>{const f=new File([b],'Urkunde_Meisterdetektiv.png',{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Fall gelöst!',text:'Ich habe den Fall des Weihnachtsdiamanten gelöst! 🔎💎'});return}}catch(e){if(e&&e.name==='AbortError')return}$('#cert-save').click()},'image/png')};
+$('#final-back').onclick=()=>{hush();SFX.paper();renderDesk();show('#s-desk')};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 // Direkt zum Schreibtisch, wenn schon gespielt
