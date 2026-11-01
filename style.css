@@ -204,3 +204,7 @@ input[type=range]{width:100%;accent-color:var(--red)}
 .env-hint{font-family:'Special Elite';color:var(--gold);text-align:center;margin:0;animation:shimmer 2s infinite}
 .sparkle{position:absolute;width:6px;height:6px;border-radius:50%;background:#ffe3a0;box-shadow:0 0 10px #ffd56b;pointer-events:none;z-index:9;animation:spk .9s ease-out forwards}
 @keyframes spk{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.titlerow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.say{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid var(--red);background:#fffaf0;font-size:20px;color:var(--red)}
+.say.on{background:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(143,28,32,.2)}}

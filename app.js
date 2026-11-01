@@ -48,7 +48,11 @@ function startAmb(){if(ambOn)return;ambOn=true;const c=ac();
  const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=500;const g=c.createGain();g.gain.value=.5;s.connect(f);f.connect(g);g.connect(master);s.start();amb=g;
  ambTimer=setInterval(()=>{if(Math.random()<.5)noise(.02+Math.random()*.03,2000+Math.random()*3000,2,.04+Math.random()*.05);SFX.tick()},1000)}
 const music=$('#music');music.volume=.16;
-function setSound(on){st.sound=on;save();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').textContent=on?'🔊':'🔇'}
+const voice=new Audio('a/stimmen.mp3');voice.preload='auto';let vStop=null;
+function vDone(){clearTimeout(vStop);try{voice.pause()}catch(e){}music.volume=.16;$('#btn-say')&&$('#btn-say').classList.remove('on')}
+function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return;const [s,d]=VOX[k];const go=()=>{voice.currentTime=s;music.volume=.05;voice.play().then(()=>{$('#btn-say')&&$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}}
+function hush(){vDone()}
+function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').textContent=on?'🔊':'🔇'}
 
 /* ---------- Schnee ---------- */
 (function(){const cv=$('#snow'),cx=cv.getContext('2d');let W,H,fl=[];function rs(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio}rs();addEventListener('resize',rs);
@@ -117,7 +121,7 @@ function typeText(node,txt,cb){clearInterval(typer);node.innerHTML='';let i=0;co
  typer=setInterval(()=>{if(i>=txt.length){clearInterval(typer);cur.remove();cb&&cb();return}cur.before(txt[i]);if(txt[i]!==' '&&i%2===0)SFX.key();i++},22);
  node.onclick=()=>{if(i<txt.length){clearInterval(typer);node.textContent=txt;cb&&cb()}}}
 const norm=s=>(s||'').toUpperCase().replace(/Ä/g,'AE').replace(/Ö/g,'OE').replace(/Ü/g,'UE').replace(/ß/g,'SS').replace(/[^A-Z0-9]/g,'');
-function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');
+function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');setTimeout(()=>say('d'+d+'a'),350);
  $('#c-date').textContent=d+'. Dezember 1891';$('#c-nr').textContent=d;$('#c-title').textContent=D.t;$('#c-q').textContent=D.q;$('#c-hint').textContent='';
  $('#c-stamp').classList.remove('on');const sv=$('#c-solved');sv.style.display='none';
  const W=$('#c-widget');W.innerHTML='';const A=$('#c-answer');A.innerHTML='';
@@ -126,8 +130,9 @@ function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');
  (WIDGETS[D.w.k]||WIDGETS.none)(ctx);
  if(D.a&&!ctx.noInput){const inp=el('input');inp.placeholder=D.num?'Zahl':'Lösung';if(D.num)inp.inputMode='numeric';inp.autocomplete='off';inp.setAttribute('autocapitalize','characters');
   const b=el('button','btn','Prüfen');b.onclick=()=>check(inp.value);inp.onkeydown=e=>{if(e.key==='Enter')check(inp.value)};A.append(inp,b);ctx.input=inp}
- $('#btn-h1').onclick=()=>{SFX.paper();$('#c-hint').textContent='Inspektor Grimsby: '+D.h[0]};
- $('#btn-h2').onclick=()=>{SFX.paper();$('#c-hint').textContent='Inspektor Grimsby: '+D.h[1]};
+ $('#btn-h1').onclick=()=>{SFX.paper();$('#c-hint').textContent='Inspektor Grimsby: '+D.h[0];say('d'+d+'h1')};
+ $('#btn-say').onclick=()=>{if(!voice.paused){hush();return}else{if(st.voice===false){st.voice=true;save()}say('d'+d+'a')}};
+ $('#btn-h2').onclick=()=>{SFX.paper();$('#c-hint').textContent='Inspektor Grimsby: '+D.h[1];say('d'+d+'h2')};
  if(st.done[d])showSolved(false);
  function check(v){const ok=(D.a||[]).some(a=>norm(a)===norm(v))||(D.loose||[]).some(a=>norm(v).includes(norm(a)));
   if(ok){showSolved(true)}else{SFX.no();const p=$('.paper');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');if(navigator.vibrate)navigator.vibrate([40,40,40]);toast('Das passt noch nicht. Schau dir die Spur noch einmal an.')}}
@@ -135,7 +140,7 @@ function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');
  function showSolved(fresh){const L=D.L;sv.innerHTML='<span class="stamp2">GELÖST</span>Dein Buchstabe:<b>'+L+'</b><br><span style="font-size:14px">'+D.how+'. Eingetragen in Feld '+d+' deines Ermittlungsberichts.</span>';sv.style.display='block';
   if(fresh){st.done[d]=1;save();SFX.seal();setTimeout(SFX.ok,250);if(navigator.vibrate)navigator.vibrate([20,60,20]);setTimeout(()=>sv.scrollIntoView({behavior:'smooth',block:'center'}),400)}
   if(d===24&&Object.keys(st.done).length===24){const fb=el('button','btn','Zum Finale');fb.style.marginTop='12px';fb.onclick=finale;sv.appendChild(el('br'));sv.appendChild(fb)}}}
-$('#btn-case-back').onclick=()=>{SFX.paper();renderDesk();show('#s-desk');setTimeout(()=>{const s=document.querySelector('#report .slot[data-d="'+curDay+'"]');if(s&&st.done[curDay]){s.classList.add('new')}},300)};
+$('#btn-case-back').onclick=()=>{hush();SFX.paper();renderDesk();show('#s-desk');setTimeout(()=>{const s=document.querySelector('#report .slot[data-d="'+curDay+'"]');if(s&&st.done[curDay]){s.classList.add('new')}},300)};
 
 /* ---------- Widgets ---------- */
 function svgEl(t,a){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);return e}
@@ -242,7 +247,7 @@ function renderAkte(){const s=$('#suspects');s.innerHTML='';SUSPECTS.forEach(x=>
 /* ---------- Finale ---------- */
 function finale(){show('#s-final');renderReport($('#final-report'),true);SFX.chime();const l=$('#accuse-list');l.innerHTML='';$('#verdict').style.display='none';$('#accuse').style.display='block';
  SUSPECTS.forEach(x=>{const b=el('button','','<span class="ic">'+x.i+'</span><b>'+x.n+'</b>'+x.r);b.onclick=()=>{if(x.n!=='Silas Tolliver'){SFX.no();toast(x.n+' hat ein Alibi. Lies deinen Bericht noch einmal.');return}verdict()};l.appendChild(b)})}
-function verdict(){SFX.seal();setTimeout(SFX.chime,300);$('#accuse').style.display='none';const v=$('#verdict');v.style.display='block';
+function verdict(){SFX.seal();setTimeout(()=>say('fin'),900);setTimeout(SFX.chime,300);$('#accuse').style.display='none';const v=$('#verdict');v.style.display='block';
  v.innerHTML='<div class="diamond">💎</div><h2>Fall gelöst!</h2><p class="story">Der Täter ist <b>Silas Tolliver</b>, der Uhrmacher. In der Nacht kam er mit seiner Werkzeugtasche zurück, öffnete die kaputte Standuhr und versteckte den Weihnachtsdiamanten im Uhrwerk. Darum tickte sie am Morgen wieder.</p><p class="story">Lady Ashcombe hält ihren Diamanten wieder in den Händen, und Inspektor Grimsby lässt ausrichten: Ohne dich hätte er diesen Fall nie gelöst.</p><video src="a/lupe.mp4" autoplay muted playsinline loop></video><p class="story" style="text-align:center"><b>Frohe Weihnachten, Ermittler!</b></p>'+(gift&&gift.von?'<p class="story" style="text-align:center">Diesen Fall hat dir '+esc(gift.von)+' geschenkt.</p>':'');
  for(let i=0;i<14;i++)setTimeout(()=>tone(800+Math.random()*900,.4,'sine',.06),i*120)}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
