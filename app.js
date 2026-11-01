@@ -45,7 +45,7 @@ const SFX={
 let ambOn=false,ambTimer=null;
 function startAmb(){if(ambOn)return;ambOn=true;const c=ac();
  const n=c.sampleRate*4,b=c.createBuffer(1,n,c.sampleRate),x=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){l=l*.995+(Math.random()*2-1)*.02;x[i]=l}
- const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=500;const g=c.createGain();g.gain.value=.5;s.connect(f);f.connect(g);g.connect(master);s.start();amb=g;
+ const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=320;const g=c.createGain();g.gain.value=.12;s.connect(f);f.connect(g);g.connect(master);s.start();amb=g;
  ambTimer=setInterval(()=>{if(Math.random()<.5)noise(.02+Math.random()*.03,2000+Math.random()*3000,2,.04+Math.random()*.05);SFX.tick()},1000)}
 const music=$('#music');music.volume=.16;
 const voice=new Audio('a/stimmen.mp3');voice.preload='auto';let vStop=null;
