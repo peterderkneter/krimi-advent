@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Der Fall des Weihnachtsdiamanten</title>
+<meta name="theme-color" content="#120d0a">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Special+Elite&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="snow"></canvas>
+
+<!-- Startbildschirm -->
+<section id="s-start" class="screen on">
+  <div class="start-bg"></div>
+  <div class="start-in">
+    <div class="kick">Abteilung für besondere Fälle · London 1891</div>
+    <h1>Der Fall des<br><em>Weihnachtsdiamanten</em></h1>
+    <p id="giftline" class="giftline"></p>
+    <div id="giftmsg" class="giftmsg"></div>
+    <div id="codebox" class="codebox">
+      <p>Bitte gib den Zugangscode aus deinem PDF ein.</p>
+      <input id="code" autocomplete="off" autocapitalize="characters" placeholder="Zugangscode">
+      <p class="small"><a href="verschenken.html">Du möchtest den Fall verschenken? Hier entlang.</a></p>
+    </div>
+    <button id="btn-start" class="btn big">Fall öffnen</button>
+    <p class="small">Mit Ton spielen. Kopfhörer machen es noch spannender.</p>
+  </div>
+</section>
+
+<!-- Intro Video -->
+<section id="s-intro" class="screen">
+  <video id="intro" playsinline preload="auto" poster="a/poster.jpg" src="a/intro.mp4"></video>
+  <div class="intro-text" id="intro-text"></div>
+  <button id="btn-skip" class="btn ghost skip">Weiter</button>
+</section>
+
+<!-- Schreibtisch mit Umschlägen -->
+<section id="s-desk" class="screen">
+  <header class="deskhead">
+    <div>
+      <div class="kick">Fallakte</div>
+      <div class="title">Der Weihnachtsdiamant</div>
+    </div>
+    <div class="headbtns">
+      <button id="btn-akte" class="icon" title="Akte">📁</button>
+      <button id="btn-sound" class="icon" title="Ton">🔊</button>
+    </div>
+  </header>
+  <div class="report" id="report"></div>
+  <div class="grid" id="grid"></div>
+  <p class="foot" id="deskfoot"></p>
+</section>
+
+<!-- Umschlag öffnen -->
+<section id="s-env" class="screen">
+  <div class="env-wrap">
+    <div class="env-date" id="env-date"></div>
+    <div class="envelope" id="envelope">
+      <div class="env-back"></div>
+      <div class="env-card" id="env-card"><div class="mini-stamp">Beweisstück</div></div>
+      <div class="env-front"></div>
+      <div class="env-flap" id="env-flap"></div>
+      <div class="ribbon-v" id="ribbon-v"></div>
+      <div class="ribbon-h" id="ribbon-h"></div>
+      <div class="bow" id="bow"><span>🎀</span></div>
+      <div class="seal" id="env-seal">KZ</div>
+    </div>
+    <div class="swipe" id="swipe">
+      <div class="swipe-track"><div class="swipe-fill" id="swipe-fill"></div><span>Schleife aufziehen</span></div>
+      <div class="swipe-knob" id="swipe-knob">➜</div>
+    </div>
+    <button class="btn ghost" id="btn-env-back">Zurück zum Schreibtisch</button>
+  </div>
+</section>
+
+<!-- Beweisstück -->
+<section id="s-case" class="screen">
+  <div class="case">
+    <div class="paper">
+      <div class="case-top"><span id="c-date"></span><span class="nr" id="c-nr"></span></div>
+      <div class="dept">London · Abteilung für besondere Fälle</div>
+      <h2 id="c-title"></h2>
+      <p class="story" id="c-story"></p>
+      <div class="widget" id="c-widget"></div>
+      <p class="question" id="c-q"></p>
+      <div class="answer" id="c-answer"></div>
+      <div class="hints">
+        <button class="btn ghost sm" id="btn-h1">Tipp 1</button>
+        <button class="btn ghost sm" id="btn-h2">Tipp 2</button>
+      </div>
+      <p class="hinttext" id="c-hint"></p>
+      <div class="solved" id="c-solved"></div>
+      <div class="stamp" id="c-stamp">GELÖST</div>
+    </div>
+    <button class="btn ghost" id="btn-case-back">Zurück zum Schreibtisch</button>
+  </div>
+</section>
+
+<!-- Akte -->
+<section id="s-akte" class="screen">
+  <div class="case"><div class="paper">
+    <h2>Ermittlungsakte</h2>
+    <p class="story">Im dichten Dezembernebel verschwindet aus dem Stadthaus von Lady Ashcombe der Weihnachtsdiamant. Sechs Verdächtige, jeden Tag ein neues Beweisstück. Jede Lösung ergibt einen Buchstaben für deinen Ermittlungsbericht. An Heiligabend weißt du, wo der Diamant liegt und wer ihn gestohlen hat.</p>
+    <h3>Die Verdächtigen</h3>
+    <div class="suspects" id="suspects"></div>
+    <h3>Zahlentafel</h3>
+    <div class="numtab" id="numtab"></div>
+    <h3>So funktioniert es</h3>
+    <p class="story">Jeden Tag im Dezember öffnet sich ein neuer Umschlag. Verpasste Tage kannst du jederzeit nachholen, zukünftige bleiben versiegelt. Dein Fortschritt bleibt auf diesem Handy gespeichert.</p>
+    <button class="btn" id="btn-akte-back">Zurück</button>
+  </div></div>
+</section>
+
+<!-- Finale -->
+<section id="s-final" class="screen">
+  <div class="case"><div class="paper final">
+    <div class="kick">24. Dezember 1891</div>
+    <h2>Dein Ermittlungsbericht</h2>
+    <div class="report big" id="final-report"></div>
+    <div id="accuse">
+      <p class="question">Der Fall ist gelöst, wenn du weißt, wer es war. Wer im Haus kennt sich mit Uhrwerken aus?</p>
+      <div class="suspects pick" id="accuse-list"></div>
+    </div>
+    <div id="verdict" class="verdict"></div>
+  </div></div>
+</section>
+
+<div id="toast" class="toast"></div>
+<audio id="music" src="a/musik.mp3" loop preload="auto"></audio>
+<script src="gate.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
