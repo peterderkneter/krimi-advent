@@ -64,15 +64,31 @@
       <div class="env-card" id="env-card"><div class="mini-stamp">Beweisstück</div></div>
       <div class="env-front"></div>
       <div class="env-flap" id="env-flap"></div>
-      <div class="ribbon-v" id="ribbon-v"></div>
-      <div class="ribbon-h" id="ribbon-h"></div>
-      <div class="bow" id="bow"><span>🎀</span></div>
-      <div class="seal" id="env-seal">KZ</div>
+      <svg id="rib" class="rib" viewBox="0 0 400 300">
+        <defs>
+          <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2474d"/><stop offset=".5" stop-color="#a8161d"/><stop offset="1" stop-color="#6e0f13"/></linearGradient>
+          <radialGradient id="wax" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#d4454a"/><stop offset="1" stop-color="#6e1014"/></radialGradient>
+          <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity=".45"/></filter>
+        </defs>
+        <g id="bands" filter="url(#sh)">
+          <path id="bv1" class="band"/><path id="bv2" class="band"/><path id="bh1" class="band"/><path id="bh2" class="band"/>
+          <path id="sv1" class="sheen"/><path id="sv2" class="sheen"/><path id="sh1" class="sheen"/><path id="sh2" class="sheen"/>
+        </g>
+        <g id="bowg" filter="url(#sh)">
+          <path id="tailL" class="tail"/><path id="tailR" class="tail"/>
+          <g id="loops"><path class="loop" d="M0 0 C -30 -58 -92 -40 -64 -6 C -50 10 -20 6 0 0Z"/><path class="loop" d="M0 0 C 30 -58 92 -40 64 -6 C 50 10 20 6 0 0Z"/>
+          <path class="loopin" d="M-6 -4 C -26 -34 -62 -30 -50 -10"/><path class="loopin" d="M6 -4 C 26 -34 62 -30 50 -10"/></g>
+          <ellipse id="knot" rx="13" ry="11" fill="url(#rg)" stroke="#5e0c10" stroke-width="1.5"/>
+        </g>
+        <g id="sealg" transform="translate(78 238)">
+          <g id="sealL"><path d="M0 -24 A24 24 0 0 0 0 24 L4 10 L-3 2 L5 -8Z" fill="url(#wax)"/></g>
+          <g id="sealR"><path d="M0 -24 L5 -8 L-3 2 L4 10 L0 24 A24 24 0 0 0 0 -24Z" fill="url(#wax)"/></g>
+          <text y="7" text-anchor="middle" font-family="Special Elite" font-size="16" fill="#f6c9b0" pointer-events="none" id="sealtxt">KZ</text>
+        </g>
+        <g id="hand" class="hand"><circle r="26" fill="rgba(216,180,106,.25)" stroke="#d8b46a" stroke-width="2"/><text y="9" text-anchor="middle" font-size="26">👆</text></g>
+      </svg>
     </div>
-    <div class="swipe" id="swipe">
-      <div class="swipe-track"><div class="swipe-fill" id="swipe-fill"></div><span>Schleife aufziehen</span></div>
-      <div class="swipe-knob" id="swipe-knob">➜</div>
-    </div>
+    <p class="env-hint" id="env-hint">Greif das Schleifenband und zieh die Schleife auf</p>
     <button class="btn ghost" id="btn-env-back">Zurück zum Schreibtisch</button>
   </div>
 </section>

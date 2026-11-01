@@ -47,7 +47,7 @@ function startAmb(){if(ambOn)return;ambOn=true;const c=ac();
  const n=c.sampleRate*4,b=c.createBuffer(1,n,c.sampleRate),x=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){l=l*.995+(Math.random()*2-1)*.02;x[i]=l}
  const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=500;const g=c.createGain();g.gain.value=.5;s.connect(f);f.connect(g);g.connect(master);s.start();amb=g;
  ambTimer=setInterval(()=>{if(Math.random()<.5)noise(.02+Math.random()*.03,2000+Math.random()*3000,2,.04+Math.random()*.05);SFX.tick()},1000)}
-const music=$('#music');music.volume=.22;
+const music=$('#music');music.volume=.16;
 function setSound(on){st.sound=on;save();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').textContent=on?'🔊':'🔇'}
 
 /* ---------- Schnee ---------- */
@@ -83,16 +83,32 @@ function renderDesk(){renderReport($('#report'));const g=$('#grid');g.innerHTML=
 
 /* ---------- Umschlag mit Schleife ---------- */
 let curDay=0;
-function openEnv(d){curDay=d;const e=$('#envelope');e.className='envelope';$('#env-date').textContent=d+'. Dezember 1891';$('#swipe').style.visibility='visible';$('#swipe-fill').style.width='0';$('#swipe-knob').style.transform='translateX(0)';show('#s-env')}
-(function(){const k=$('#swipe-knob'),sw=$('#swipe');let x0=null,max=0,cur=0,lastSnd=0;
- const start=e=>{ac();x0=(e.touches?e.touches[0]:e).clientX-cur;max=sw.clientWidth-60;e.preventDefault()};
- const move=e=>{if(x0===null)return;const x=(e.touches?e.touches[0]:e).clientX;cur=Math.max(0,Math.min(max,x-x0));k.style.transform='translateX('+cur+'px)';$('#swipe-fill').style.width=(cur+30)+'px';const now=Date.now();if(now-lastSnd>90){noise(.08,600+cur*8,3,.12);lastSnd=now}
-  $('#bow').style.transform='translate(-50%,-50%) rotate('+(cur/max*25)+'deg) scale('+(1+cur/max*.2)+')';e.preventDefault()};
- const end=()=>{if(x0===null)return;x0=null;if(cur>max*.85){untie()}else{cur=0;k.style.transition='transform .3s';k.style.transform='translateX(0)';$('#swipe-fill').style.width='0';$('#bow').style.transform='translate(-50%,-50%)';setTimeout(()=>k.style.transition='',300)}};
- k.addEventListener('touchstart',start,{passive:false});k.addEventListener('mousedown',start);
- addEventListener('touchmove',move,{passive:false});addEventListener('mousemove',move);addEventListener('touchend',end);addEventListener('mouseup',end);
- function untie(){cur=0;const e=$('#envelope');SFX.ribbon();if(navigator.vibrate)navigator.vibrate(30);e.classList.add('untied');$('#swipe').style.visibility='hidden';$('#bow').style.transform='';
-  setTimeout(()=>{SFX.seal()},250);setTimeout(()=>{SFX.paper();e.classList.add('opened')},700);setTimeout(()=>{st.open[curDay]=1;save();openCase(curDay)},2200)}})();
+const RB={C:[200,150],k:[200,150],p:null,t:0,free:false};
+function rbDraw(){const [cx,cy]=RB.C,[kx,ky]=RB.k,set=(id,d)=>document.getElementById(id).setAttribute('d',d);
+ const v1=`M200 -14 Q${(200+kx)/2} ${ky*0.45} ${kx} ${ky}`,v2=`M${kx} ${ky} Q${(200+kx)/2} ${ky+(314-ky)*0.55} 200 314`,h1=`M-14 150 Q${kx*0.45} ${(150+ky)/2} ${kx} ${ky}`,h2=`M${kx} ${ky} Q${kx+(414-kx)*0.55} ${(150+ky)/2} 414 150`;
+ set('bv1',v1);set('bv2',v2);set('bh1',h1);set('bh2',h2);set('sv1',v1);set('sv2',v2);set('sh1',h1);set('sh2',h2);
+ const t=RB.t,sc=1-0.8*Math.min(1,t);document.getElementById('loops').setAttribute('transform',`scale(${sc}) rotate(${t*25})`);
+ document.getElementById('bowg').setAttribute('transform',`translate(${kx} ${ky})`);
+ const p=RB.p||[kx+42,ky+92];const px=p[0]-kx,py=p[1]-ky;set('tailR',`M0 0 Q${px*0.4+10} ${py*0.6+18} ${px} ${py}`);
+ set('tailL',`M0 0 Q${-18+t*6} ${36-t*10} ${-36+t*16} ${80-t*30}`)}
+function openEnv(d){curDay=d;const e=$('#envelope');e.className='envelope';$('#rib').setAttribute('class','rib');RB.k=[200,150];RB.p=null;RB.t=0;RB.free=false;rbDraw();
+ $('#env-hint').style.visibility='visible';$('#env-date').textContent=d+'. Dezember 1891';show('#s-env')}
+(function(){const sv=$('#rib');let drag=false,last=0,lp=null;
+ const toV=e=>{const r=sv.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return [(p.clientX-r.left)/r.width*400,(p.clientY-r.top)/r.height*300]};
+ const start=e=>{if(RB.free)return;ac();drag=true;sv.classList.add('dragging');move(e);e.preventDefault()};
+ function move(e){if(!drag)return;const v=toV(e);const dx=v[0]-200,dy=v[1]-150,dist=Math.hypot(dx,dy);RB.t=Math.max(0,(dist-60)/150);
+  const pull=Math.min(1,RB.t);RB.k=[200+dx*0.12*pull,150+dy*0.12*pull];RB.p=v;rbDraw();
+  const now=performance.now();if(lp&&now-last>70){const sp=Math.hypot(v[0]-lp[0],v[1]-lp[1]);if(sp>3)noise(.07,500+dist*6,3,Math.min(.25,.04+sp/200));last=now}lp=v;
+  if(navigator.vibrate&&RB.t>.7&&Math.random()<.08)navigator.vibrate(8);
+  if(RB.t>=1)untie(v);e.preventDefault&&e.preventDefault()}
+ function end(){if(!drag||RB.free)return;drag=false;sv.classList.remove('dragging');const k0=RB.k.slice(),p0=RB.p?RB.p.slice():null,t0=RB.t,T0=performance.now();
+  (function spring(n){const u=Math.min(1,(n-T0)/550),o=1-Math.pow(1-u,3)*Math.cos(u*9)*1,w=Math.max(0,1-o);RB.k=[200+(k0[0]-200)*w,150+(k0[1]-150)*w];RB.t=t0*w;RB.p=p0?[RB.k[0]+42+(p0[0]-RB.k[0]-42)*w,RB.k[1]+92+(p0[1]-RB.k[1]-92)*w]:null;rbDraw();if(u<1)requestAnimationFrame(spring);else{RB.p=null;rbDraw()}})(T0)}
+ function untie(v){if(RB.free)return;RB.free=true;drag=false;const e=$('#envelope');sv.classList.remove('dragging');sv.classList.add('free');$('#env-hint').style.visibility='hidden';
+  SFX.ribbon();if(navigator.vibrate)navigator.vibrate([30,40,60]);
+  const r=e.getBoundingClientRect();for(let i=0;i<16;i++){const s=el('div','sparkle');s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+r.height/2)+'px';const a=Math.random()*6.28,d=60+Math.random()*90;s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),1000)}
+  setTimeout(()=>SFX.seal(),300);setTimeout(()=>{SFX.paper();e.classList.add('opened')},1000);setTimeout(()=>{st.open[curDay]=1;save();openCase(curDay)},2500)}
+ sv.addEventListener('touchstart',start,{passive:false});sv.addEventListener('mousedown',start);
+ addEventListener('touchmove',move,{passive:false});addEventListener('mousemove',move);addEventListener('touchend',end);addEventListener('mouseup',end);})();
 $('#btn-env-back').onclick=()=>{renderDesk();show('#s-desk')};
 
 /* ---------- Beweisstück ---------- */
