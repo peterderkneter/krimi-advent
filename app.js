@@ -49,10 +49,10 @@ function startAmb(){if(ambOn)return;ambOn=true;const c=ac();
  const n=c.sampleRate*4,b=c.createBuffer(1,n,c.sampleRate),x=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){l=l*.995+(Math.random()*2-1)*.02;x[i]=l}
  const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=320;const g=c.createGain();g.gain.value=.12;s.connect(f);f.connect(g);g.connect(master);s.start();amb=g;
  ambTimer=setInterval(()=>{if(Math.random()<.5)noise(.02+Math.random()*.03,2000+Math.random()*3000,2,.04+Math.random()*.05);SFX.tick()},1000)}
-const music=$('#music');music.volume=.16;
+const music=$('#music');music.volume=.07;
 const voice=new Audio('a/stimmen.mp3');voice.preload='auto';let vStop=null;
-function vDone(){clearTimeout(vStop);try{voice.pause()}catch(e){}music.volume=.16;$('#btn-say')&&$('#btn-say').classList.remove('on')}
-function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return;const [s,d]=VOX[k];const go=()=>{voice.currentTime=s;music.volume=.05;voice.play().then(()=>{$('#btn-say')&&$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}}
+function vDone(){clearTimeout(vStop);try{voice.pause()}catch(e){}music.volume=.07;$('#btn-say')&&$('#btn-say').classList.remove('on')}
+function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return;const [s,d]=VOX[k];const go=()=>{voice.currentTime=s;music.volume=.02;voice.play().then(()=>{$('#btn-say')&&$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}}
 function hush(){vDone()}
 function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').textContent=on?'🔊':'🔇'}
 
