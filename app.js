@@ -18,8 +18,10 @@ async function access(){await ready;if(st.act)return true;const v=kzNormCode($('
  SFX.no();toast(v?'Dieser Code stimmt nicht. Schau noch einmal in dein PDF.':'Bitte gib zuerst deinen Zugangscode ein.');$('#code').focus();return false}
 
 /* ---------- Datum ---------- */
-function berlin(){const p=new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',year:'numeric',month:'numeric',day:'numeric'}).formatToParts(new Date());const o={};p.forEach(x=>o[x.type]=+x.value);return o}
-const PROBE=params.get('probe')==='kz1891';
+let TOFF=0;
+(async()=>{try{const r=await fetch(location.pathname+'?t='+Date.now(),{method:'HEAD',cache:'no-store'});const d=Date.parse(r.headers.get('date'));if(d){TOFF=d-Date.now();if($('#s-desk').classList.contains('on'))renderDesk()}}catch(e){}})();
+function berlin(){const p=new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',year:'numeric',month:'numeric',day:'numeric'}).formatToParts(new Date(Date.now()+TOFF));const o={};p.forEach(x=>o[x.type]=+x.value);return o}
+let PROBE=false;(async()=>{const q=params.get('probe');if(q&&await kzSha(q)==='c7f21b727a843753621d0398c133d25f15a97a8884ce156576bbbed47e6c17c9'){PROBE=true;if($('#s-desk').classList.contains('on'))renderDesk()}})();
 function unlocked(d){if(PROBE)return true;const b=berlin();if(b.month===12)return b.day>=d;if(b.month===1&&b.day<=31)return true;return false}
 function todayNr(){const b=berlin();return b.month===12&&b.day<=24?b.day:0}
 
@@ -81,7 +83,7 @@ function renderReport(box,big){box.innerHTML='';let i=0;WORDS.forEach(w=>{const 
 function renderDesk(){renderReport($('#report'));const g=$('#grid');g.innerHTML='';const td=todayNr();
  for(let d=1;d<=24;d++){const b=el('button','env');b.style.setProperty('--r',((d*37)%7-3)*.6+'deg');b.style.setProperty('--i',d);const u=unlocked(d);
   if(st.done[d])b.classList.add('open');else if(!u)b.classList.add('locked');if(d===td&&!st.done[d])b.classList.add('today');
-  b.appendChild(el('span','num',d));b.appendChild(el('span','wax',st.done[d]?SOL[d-1]:(u?'KZ':'🔒')));
+  b.appendChild(el('span','num',d));b.appendChild(el('span','wax'+(st.done[d]?'':' seal'),st.done[d]?SOL[d-1]:'<img src="a/siegel.svg" alt="">'+(u?'':'<i>🔒</i>')));
   b.onclick=()=>{if(!unlocked(d)){SFX.no();toast('Dieser Umschlag ist bis zum '+d+'. Dezember versiegelt.');return}SFX.tap();if(st.done[d]||st.open[d])openCase(d);else openEnv(d)};g.appendChild(b)}
  const n=Object.keys(st.done).length;$('#deskfoot').textContent=n===24?'Alle Beweisstücke gelöst. Öffne Umschlag 24 für das Finale.':n+' von 24 Beweisstücken gelöst. Jeden Tag im Dezember öffnet sich ein neuer Umschlag.'}
 
@@ -286,8 +288,7 @@ async function certCanvas(){try{await document.fonts.ready}catch(e){}const W=160
  x.textAlign='center';x.font='italic 52px "Playfair Display"';x.fillStyle='#2a1d14';x.fillText('Grimsby',380,960);x.fillText('24.12.1891',1220,960);
  x.strokeStyle='#2a1d14';x.lineWidth=2;[[250,510],[1090,1350]].forEach(([a,b])=>{x.beginPath();x.moveTo(a,985);x.lineTo(b,985);x.stroke()});
  x.font='24px Lora';x.fillText('Inspektor Grimsby',380,1022);x.fillText('London',1220,1022);
- const rg=x.createRadialGradient(780,940,10,800,960,90);rg.addColorStop(0,'#d4454a');rg.addColorStop(1,'#6e1014');x.fillStyle=rg;x.beginPath();x.arc(800,960,82,0,7);x.fill();
- x.fillStyle='#f6c9b0';x.font='44px "Special Elite"';x.fillText('KZ',800,975);return cv}
+ await new Promise(res=>{const im=new Image();im.onload=()=>{x.drawImage(im,700,860,200,200);res()};im.onerror=res;im.src='a/siegel.svg'});return cv}
 $('#cert-save').onclick=async()=>{SFX.tap();const cv=await certCanvas();cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Urkunde_Meisterdetektiv.png';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500);toast('Urkunde gespeichert')},'image/png')};
 $('#cert-share').onclick=async()=>{SFX.tap();const cv=await certCanvas();cv.toBlob(async b=>{const f=new File([b],'Urkunde_Meisterdetektiv.png',{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Fall gelöst!',text:'Ich habe den Fall des Weihnachtsdiamanten gelöst! 🔎💎'});return}}catch(e){if(e&&e.name==='AbortError')return}$('#cert-save').click()},'image/png')};
 $('#final-back').onclick=()=>{hush();SFX.paper();renderDesk();show('#s-desk')};

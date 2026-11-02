@@ -81,9 +81,11 @@
           <ellipse id="knot" rx="13" ry="11" fill="url(#rg)" stroke="#5e0c10" stroke-width="1.5"/>
         </g>
         <g id="sealg" transform="translate(78 238)">
-          <g id="sealL"><path d="M0 -24 A24 24 0 0 0 0 24 L4 10 L-3 2 L5 -8Z" fill="url(#wax)"/></g>
-          <g id="sealR"><path d="M0 -24 L5 -8 L-3 2 L4 10 L0 24 A24 24 0 0 0 0 -24Z" fill="url(#wax)"/></g>
-          <text y="7" text-anchor="middle" font-family="Special Elite" font-size="16" fill="#f6c9b0" pointer-events="none" id="sealtxt">KZ</text>
+          <clipPath id="clL"><path d="M-40 -40 L2 -40 L6 -12 L-3 1 L5 12 L0 40 L-40 40Z"/></clipPath>
+          <clipPath id="clR"><path d="M2 -40 L40 -40 L40 40 L0 40 L5 12 L-3 1 L6 -12Z"/></clipPath>
+          <g id="sealL"><image href="a/siegel.svg" x="-27" y="-27" width="54" height="54" clip-path="url(#clL)"/></g>
+          <g id="sealR"><image href="a/siegel.svg" x="-27" y="-27" width="54" height="54" clip-path="url(#clR)"/></g>
+          <text id="sealtxt"></text>
         </g>
         <g id="hand" class="hand"><circle r="26" fill="rgba(216,180,106,.25)" stroke="#d8b46a" stroke-width="2"/><text y="9" text-anchor="middle" font-size="26">👆</text></g>
       </svg>
@@ -170,7 +172,7 @@
           <div class="cert-sub">zum</div>
           <div class="cert-rank">Meisterdetektiv</div>
           <div class="cert-text">ernannt. In 24 Tagen wurden alle Beweisstücke gesichert, der Fall des Weihnachtsdiamanten aufgeklärt und der Täter Silas Tolliver überführt.</div>
-          <div class="cert-foot"><div><span class="sig">Grimsby</span><small>Inspektor Grimsby</small></div><div class="cert-seal">KZ</div><div><span class="sig2">24.12.1891</span><small>London</small></div></div>
+          <div class="cert-foot"><div><span class="sig">Grimsby</span><small>Inspektor Grimsby</small></div><div class="cert-seal"></div><div><span class="sig2">24.12.1891</span><small>London</small></div></div>
         </div>
       </div>
       <div class="cert-name-edit" id="cert-edit"><input id="cert-input" maxlength="32" placeholder="Dein Name für die Urkunde"><button class="btn sm" id="cert-set">Eintragen</button></div>
